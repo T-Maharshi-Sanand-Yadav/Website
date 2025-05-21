@@ -1,0 +1,80 @@
+/* 1. Force full width for static pages */
+.static_page .post {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 30px !important;
+    box-sizing: border-box;
+    background: white;
+    background-color: #ffffff !important;
+    border: none;
+    box-shadow: none;
+}
+
+/* 2. Disable animation transitions */
+body *,
+body *::before,
+body *::after {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* 3. Make background consistent */
+body {
+    background-color: #ffffff !important;
+}
+
+/* 4. Hide unwanted transitions or dynamic view effects */
+#header-container,
+#content,
+#footer,
+.dynamic-view,
+.content-outer,
+.content-fauxcolumn-outer,
+.main-outer {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* 5. Disable dynamic resize flicker */
+iframe, embed, object {
+    max-width: 100%;
+}
+
+img {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0;
+    margin: 0;
+}
+
+/* 6. Force full width layout */
+#outer-wrapper,
+.container,
+#content-wrapper {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* 7. Show blog pager for navigation */
+.blog-pager {
+    display: block !important;
+    text-align: center;
+    margin-top: 30px;
+}
+.blog-pager a {
+    color: #1e88e5;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* 8. Styling for list of all posts */
+#all-posts-list {
+    list-style: disc;
+    margin-left: 20px;
+    font-size: 16px;
+}
+#all-posts-list li {
+    margin-bottom: 8px;
+}
