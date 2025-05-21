@@ -48,13 +48,40 @@ img {
     margin: 0;
 }
 
-/* 6. Force full width layout */
+/* 6. Force full width layout - Enhanced */
 #outer-wrapper,
 .container,
-#content-wrapper {
+#content-wrapper,
+.content-outer,
+.content-fauxcolumn-outer,
+.main-outer,
+.main-inner,
+.blog-posts,
+.post-outer,
+.post {
     width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* Ensure header and navigation are also full width */
+.header-outer,
+.header-inner,
+#Header1,
+#navbar,
+#navbar-iframe-container {
+    width: 100% !important;
+    max-width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
+}
+
+/* Optional: Add slight padding to post content for readability */
+.post-body {
+    padding: 15px !important;
 }
 
 /* 7. Show blog pager for navigation */
