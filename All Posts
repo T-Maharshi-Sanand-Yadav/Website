@@ -4,73 +4,93 @@
 
 <script>
   const blogURL = "https://www.tmsytutorials.com";
-  const labels = [
-    "Cadence Genus", "DEF", "genus", "gvim", "Innovus",
-    "interview preparation", "Liberty Files", "Pin Placement",
-    "STA", "standard cell characterization", "Tempus", "verilog hdl"
-  ];
 
-  const container = document.getElementById("all-posts-collapsible");
-
-  labels.forEach(label => {
-    const id = label.replace(/\s+/g, '-').toLowerCase();
-    const section = document.createElement("div");
-    section.innerHTML = `
-      <button onclick="togglePosts('${id}')" class="collapsible-btn">${label}</button>
-      <div id="${id}" class="collapsible-content">
-        <p>Loading...</p>
-      </div>
-    `;
-    container.appendChild(section);
-
-    const callbackName = `render_${id}`;
-    window[callbackName] = function(json) {
-      const entries = json.feed.entry;
-      const contentDiv = document.getElementById(id);
-      if (!entries) {
-        contentDiv.innerHTML = "<p>No posts found.</p>";
-        return;
-      }
-      const ul = document.createElement("ul");
-      entries.forEach(entry => {
-        const title = entry.title.$t;
-        const link = entry.link.find(l => l.rel === "alternate").href;
-        const li = document.createElement("li");
-        li.innerHTML = `<a href="${link}" target="_blank">${title}</a>`;
-        ul.appendChild(li);
-      });
-      contentDiv.innerHTML = "";
-      contentDiv.appendChild(ul);
-    };
-
+  // Function to fetch all labels from the blog
+  function fetchLabels(callback) {
     const script = document.createElement("script");
-    script.src = `${blogURL}/feeds/posts/summary/-/${encodeURIComponent(label)}?alt=json-in-script&max-results=100&callback=${callbackName}`;
+    const callbackName = "fetchLabelsCallback";
+    window[callbackName] = function(json) {
+      const labels = json.feed.category ? json.feed.category.map(cat => cat.term).sort() : [];
+      if (labels.length === 0) {
+        document.getElementById("all-posts-collapsible").innerHTML += "<p>No labels found.</p>";
+      }
+      callback(labels);
+    };
+    script.src = `${blogURL}/feeds/posts/summary/-/all?alt=json-in-script&max-results=0&callback=${callbackName}`;
+    script.onerror = function() {
+      console.error("Failed to fetch labels from Blogger API.");
+      document.getElementById("all-posts-collapsible").innerHTML += "<p>Failed to load labels. Please try again later.</p>";
+    };
     document.body.appendChild(script);
-  });
-
-  function togglePosts(id) {
-    const div = document.getElementById(id);
-    div.style.display = div.style.display === "none" ? "block" : "none";
   }
+
+  // Function to create sections for each label
+  function createSections(labels) {
+    const container = document.getElementById("all-posts-collapsible");
+    labels.forEach(label => {
+      const id = label.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase(); // Sanitize ID
+      const section = document.createElement("div");
+      section.innerHTML = `
+        <h2>${label}</h2>
+        <div id="${id}" class="content">
+          <p>Loading...</p>
+        </div>
+      `;
+      container.appendChild(section);
+
+      const callbackName = `render_${id}_${Date.now()}`; // Unique callback to avoid conflicts
+      window[callbackName] = function(json) {
+        const contentDiv = document.getElementById(id);
+        if (!json.feed || !json.feed.entry) {
+          console.warn(`No posts found for label: ${label}`);
+          contentDiv.innerHTML = "<p>No posts found.</p>";
+          return;
+        }
+        const entries = json.feed.entry;
+        const ul = document.createElement("ul");
+        entries.forEach(entry => {
+          const title = entry.title.$t;
+          const link = entry.link.find(l => l.rel === "alternate").href;
+          const li = document.createElement("li");
+          li.innerHTML = `<a href="${link}" target="_blank">${title}</a>`;
+          ul.appendChild(li);
+        });
+        contentDiv.innerHTML = "";
+        contentDiv.appendChild(ul);
+      };
+
+      const script = document.createElement("script");
+      script.src = `${blogURL}/feeds/posts/summary/-/${encodeURIComponent(label)}?alt=json-in-script&max-results=100&callback=${callbackName}`;
+      script.onerror = function() {
+        console.error(`Failed to fetch posts for label: ${label}`);
+        document.getElementById(id).innerHTML = "<p>Failed to load posts. Please try again later.</p>";
+      };
+      // Timeout for slow API responses
+      setTimeout(() => {
+        if (document.getElementById(id).innerHTML.includes("Loading...")) {
+          console.warn(`Timeout: Posts for label ${label} did not load within 10 seconds.`);
+          document.getElementById(id).innerHTML = "<p>Failed to load posts (timeout). Please try again later.</p>";
+        }
+      }, 10000); // 10-second timeout
+      document.body.appendChild(script);
+    });
+  }
+
+  // Initialize by fetching labels and creating sections
+  fetchLabels(createSections);
 </script>
 
 <style>
-  .collapsible-btn {
+  h2 {
     background-color: #2a5d84;
     color: white;
     padding: 10px 16px;
-    border: none;
-    text-align: left;
-    width: 100%;
-    font-size: 16px;
-    cursor: pointer;
     margin-top: 10px;
     border-radius: 4px;
   }
 
-  .collapsible-content {
+  .content {
     padding: 10px 20px;
-    display: none;
     background-color: #f9f9f9;
     border: 1px solid #ccc;
     border-top: none;
